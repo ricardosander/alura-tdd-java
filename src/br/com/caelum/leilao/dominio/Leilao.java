@@ -55,6 +55,28 @@ public class Leilao {
 		return Collections.unmodifiableList(lances);
 	}
 
-	
+	public void dobraLance(Usuario usuario) {
+		
+		Lance ultimoLance = ultimoLance(usuario);
+		if (deveDobrar(ultimoLance)) {
+			this.propoe(new Lance(usuario, ultimoLance.getValor() * 2));
+		}
+	}
+
+	private boolean deveDobrar(Lance ultimoLance) {
+		return !this.semLances() && ultimoLance != null;
+	}
+
+	private Lance ultimoLance(Usuario usuario) {
+		
+		Lance ultimoLance = null;
+		for (Lance l : this.getLances()) {
+			
+			if (l.getUsuario().equals(usuario)) {
+				ultimoLance = l;
+			}
+		}
+		return ultimoLance;
+	}
 	
 }
