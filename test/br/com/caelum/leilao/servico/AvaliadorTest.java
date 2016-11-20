@@ -1,6 +1,12 @@
 package br.com.caelum.leilao.servico;
 
+import static br.com.caelum.leilao.desafio.LeilaoMacher.temUmLance;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
+
+import java.util.List;
+
+import static org.hamcrest.Matchers.*;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +34,16 @@ public class AvaliadorTest {
 		this.jose = new Usuario("José");
 		this.maria = new Usuario("Maria");
 	}
+	
+	@Test(expected=RuntimeException.class)
+	public void leilaoSemPropostas() {
+		
+		Leilao leilao = new LeilaoBuilder()
+				.com("Leilão sem lances")
+				.controi();
+		
+		this.leiloeiro.avalia(leilao);
+	}
 
 	@Test
 	public void testAvaliacaoOrdemCrescente() {
@@ -49,9 +65,9 @@ public class AvaliadorTest {
 		double maior = 300.0;
 		double media = (100 + 200 + 300) / 3;
 
-		Assert.assertEquals(menor, this.leiloeiro.getMenor(), 0);
-		Assert.assertEquals(maior, this.leiloeiro.getMaior(), 0);
-		Assert.assertEquals(media, this.leiloeiro.getMedia(), 0);
+		assertThat(this.leiloeiro.getMenor(), equalTo(menor));
+		assertThat(this.leiloeiro.getMaior(), equalTo(maior));
+		assertThat(this.leiloeiro.getMedia(), equalTo(media));
 	}
 
 	@Test
@@ -69,8 +85,8 @@ public class AvaliadorTest {
 
 		this.leiloeiro.avalia(leilao);
 
-		assertEquals(120, this.leiloeiro.getMenor(), 0);
-		assertEquals(700, this.leiloeiro.getMaior(), 0);
+		assertThat(this.leiloeiro.getMenor(), equalTo(120.0));
+		assertThat(this.leiloeiro.getMaior(), equalTo(700.0));
 	}
 
 	@Test
@@ -86,8 +102,8 @@ public class AvaliadorTest {
 		
 		this.leiloeiro.avalia(leilao);
 
-		assertEquals(100, this.leiloeiro.getMenor(), 0);
-		assertEquals(400, this.leiloeiro.getMaior(), 0);
+		assertThat(this.leiloeiro.getMenor(), equalTo(100.0));
+		assertThat(this.leiloeiro.getMaior(), equalTo(400.0));
 	}
 
 	@Test
@@ -100,8 +116,8 @@ public class AvaliadorTest {
 
 		this.leiloeiro.avalia(leilao);
 
-		assertEquals(500.0, this.leiloeiro.getMaior(), 0);
-		assertEquals(500.0, this.leiloeiro.getMenor(), 0);
+		assertThat(this.leiloeiro.getMaior(), equalTo(500.0));
+		assertThat(this.leiloeiro.getMenor(), equalTo(500.0));
 	}
 
 	@Test
@@ -117,11 +133,15 @@ public class AvaliadorTest {
 				.controi();
 
 		this.leiloeiro.avalia(leilao);
+		List<Lance> maiores = this.leiloeiro.getTresMaiores();
+		
+		assertThat(maiores.size(), equalTo(3));
+		assertThat(maiores, hasItems(
+				new Lance(joao, 600),
+				new Lance(joao, 500),
+				new Lance(joao, 300)
 
-		assertEquals(3, this.leiloeiro.getTresMaiores().size());
-		assertEquals(600, this.leiloeiro.getTresMaiores().get(0).getValor(), 0);
-		assertEquals(500, this.leiloeiro.getTresMaiores().get(1).getValor(), 0);
-		assertEquals(300, this.leiloeiro.getTresMaiores().get(2).getValor(), 0);
+		));
 	}
 
 	@Test
@@ -132,24 +152,17 @@ public class AvaliadorTest {
 				.lance(new Lance(this.joao, 300))
 				.lance(new Lance(this.maria, 200))
 				.controi();
+		
 
 		this.leiloeiro.avalia(leilao);
-
-		assertEquals(2, this.leiloeiro.getTresMaiores().size());
-		assertEquals(300, this.leiloeiro.getTresMaiores().get(0).getValor(), 0);
-		assertEquals(200, this.leiloeiro.getTresMaiores().get(1).getValor(), 0);
+		
+		List<Lance> maiores = this.leiloeiro.getTresMaiores();
+		assertThat(leilao, temUmLance(new Lance(this.maria, 200)));
+		assertThat(maiores.size(), equalTo(2));
+		assertThat(maiores, hasItems(
+				new Lance(joao, 300),
+				new Lance(maria, 200)
+		));
 	}
-
-	@Test
-	public void testTresMaioresdeNenhum() {
-
-		Leilao leilao = new LeilaoBuilder()
-				.com("Leilão para cinco.")
-				.controi();
-
-		this.leiloeiro.avalia(leilao);
-
-		assertEquals(0, this.leiloeiro.getTresMaiores().size());
-	}
-
+	
 }
